@@ -7,9 +7,9 @@ A portfolio tracking app for beginner and intermediate retail investors who hold
 | Member | GitHub | Lead use case | Supports |
 |--------|--------|---------------|----------|
 | Member A | @___ | UC1: Account & Session | UC2 |
-| Member B | @___ | UC2: Portfolio Dashboard | UC1 |
-| Member C | @___ | UC3: Stock Lookup & Evaluator | UC4 |
-| Member D | @___ | UC4: Performance vs. Benchmark & Inflation | UC3 |
+| Ryan | @ryanssaleh | UC2: Portfolio Dashboard | UC1 |
+| Diego | @diegoAisa10 | UC3: Stock Lookup & Evaluator | UC4 |
+| Achu | @dev-Achu | UC4: Performance vs. Benchmark & Inflation | UC3 |
 | Member E | @___ | UC5: Rebalancing Planner | UC2 |
 
 Every member leads exactly one use case.
