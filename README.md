@@ -23,17 +23,17 @@ The MVP is the minimal set below. Anything else is a stretch goal and is only st
 - **Main flow:** Enter username and password → validate → create or load the user → show the dashboard. Logout clears the session.
 - **Error cases:** Username taken, empty or weak password, wrong credentials, user not found.
 
-### UC2: Portfolio Dashboard (Lead: Member B)
+### UC2: Portfolio Dashboard (Lead: Ryan)
 - **User story:** As an investor, I want to enter my holdings and trades and see total value and allocation by asset class.
 - **Main flow:** Add a transaction (ticker, buy/sell, quantity, price, date) → update holdings → fetch current prices → show total value and allocation chart.
 - **Error cases:** Unknown ticker, selling more than owned, negative quantity or price, price fetch failure (fall back to last known price).
 
-### UC3: Stock Lookup & Evaluator (Lead: Member C)
+### UC3: Stock Lookup & Evaluator (Lead: Diego)
 - **User story:** As an investor, I want to search a ticker and see its price history and key metrics before I buy.
 - **Main flow:** Enter ticker → fetch quote, history, and metrics (e.g. P/E, 52-week range) → display with a price chart → option to add to a portfolio.
 - **Error cases:** Ticker not found, API rate limit hit, network failure, missing metrics for the security.
 
-### UC4: Performance vs. Benchmark & Inflation (Lead: Member D)
+### UC4: Performance vs. Benchmark & Inflation (Lead: Achu)
 - **User story:** As an investor, I want to compare my returns to a market index and to inflation, to know if I am actually beating them.
 - **Main flow:** Select portfolio, date range, and benchmark (S&P 500, TSX) → compute portfolio return → fetch benchmark and CPI over the same range → show side-by-side chart and summary (nominal and inflation-adjusted).
 - **Error cases:** Portfolio has no history in the range, benchmark or CPI data unavailable, invalid date range.
