@@ -19,6 +19,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -79,12 +80,17 @@ class StockLookupAppTest {
     }
 
     private <T extends Component> T find(Container parent, Class<T> type, Predicate<T> matches) {
+        return Objects.requireNonNull(findOrNull(parent, type, matches),
+                "The lookup view is missing a matching " + type.getSimpleName());
+    }
+
+    private <T extends Component> T findOrNull(Container parent, Class<T> type, Predicate<T> matches) {
         for (Component child : parent.getComponents()) {
             if (type.isInstance(child) && matches.test(type.cast(child))) {
                 return type.cast(child);
             }
             if (child instanceof Container) {
-                T result = find((Container) child, type, matches);
+                T result = findOrNull((Container) child, type, matches);
                 if (result != null) {
                     return result;
                 }

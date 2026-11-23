@@ -26,9 +26,12 @@ public final class StockLookupPresenter implements StockLookupOutputBoundary {
         List<Double> closes = history.stream().map(PricePoint::getClose).collect(Collectors.toList());
         String firstDate = history.isEmpty() ? "" : history.get(0).getDate().toString();
         String lastDate = history.isEmpty() ? "" : history.get(history.size() - 1).getDate().toString();
-        String metricsText = "P/E: " + display(metrics.getPriceToEarnings())
-                + "     52-week low: " + display(metrics.getWeek52Low())
-                + "     52-week high: " + display(metrics.getWeek52High());
+        OptionalDouble ratio = metrics.getPriceToEarnings();
+        OptionalDouble low = metrics.getWeek52Low();
+        OptionalDouble high = metrics.getWeek52High();
+        String metricsText = "P/E: " + (ratio.isPresent() ? format(ratio.getAsDouble()) : "Unavailable")
+                + "     52-week low: " + (low.isPresent() ? format(low.getAsDouble()) : "Unavailable")
+                + "     52-week high: " + (high.isPresent() ? format(high.getAsDouble()) : "Unavailable");
 
         update(new StockLookupState(output.getTicker(), quote.getSecurity().getName(),
                 format(quote.getClose()), quote.getDate().toString(), quote.getClose(),
@@ -43,10 +46,6 @@ public final class StockLookupPresenter implements StockLookupOutputBoundary {
     private void update(StockLookupState state) {
         viewModel.setState(state);
         viewModel.firePropertyChanged();
-    }
-
-    private String display(OptionalDouble metric) {
-        return metric.isPresent() ? format(metric.getAsDouble()) : "Unavailable";
     }
 
     private String format(double value) {

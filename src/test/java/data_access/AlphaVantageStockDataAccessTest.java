@@ -1,5 +1,6 @@
 package data_access;
 
+import entity.Security;
 import org.junit.jupiter.api.Test;
 import use_case.stock_lookup.StockDataException;
 import use_case.stock_lookup.StockLookupDataAccessInterface;
@@ -17,6 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -45,7 +47,9 @@ class AlphaVantageStockDataAccessTest {
         assertEquals(220.0, result.getSnapshot().getMetrics().getWeek52High().orElseThrow());
 
         dataAccess.lookup("AAPL");
-        assertEquals("Apple Inc.", dataAccess.findSecurity("AAPL").getName());
+        Security security = dataAccess.findSecurity("AAPL");
+        assertNotNull(security);
+        assertEquals("Apple Inc.", security.getName());
         assertEquals(191.25, dataAccess.getCurrentPrice("AAPL"));
         assertEquals(3, requests.size());
         assertTrue(requests.get(0).toString().contains("function=GLOBAL_QUOTE&symbol=AAPL"));

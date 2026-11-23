@@ -48,7 +48,7 @@ public final class AlphaVantageStockDataAccess
     private final Map<String, Cached<StockSnapshot>> lookups = new HashMap<>();
 
     public AlphaVantageStockDataAccess(String apiKey) {
-        this(apiKey, Clock.systemUTC(), httpSource());
+        this(apiKey, Clock.systemUTC(), new HttpResponseSource());
     }
 
     AlphaVantageStockDataAccess(String apiKey, Clock clock, ResponseSource source) {
@@ -229,11 +229,16 @@ public final class AlphaVantageStockDataAccess
         return URLEncoder.encode(text, StandardCharsets.UTF_8);
     }
 
-    private static ResponseSource httpSource() {
-        HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(8)).build();
-        return uri -> {
+    /** Reuses a client across requests for the lifetime of the application. */
+    private static final class HttpResponseSource implements ResponseSource {
+        private static final HttpClient CLIENT = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(8))
+                .build();
+
+        @Override
+        public String fetch(URI uri) throws IOException, InterruptedException, StockDataException {
             HttpRequest request = HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(12)).GET().build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 429) {
                 throw new StockDataException(RATE_LIMIT);
             }
@@ -244,7 +249,7 @@ public final class AlphaVantageStockDataAccess
                 throw new StockDataException("Alpha Vantage is unavailable (HTTP " + response.statusCode() + ").");
             }
             return response.body();
-        };
+        }
     }
 
     @FunctionalInterface
