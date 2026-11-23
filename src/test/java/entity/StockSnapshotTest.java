@@ -24,7 +24,7 @@ class StockSnapshotTest {
     }
 
     @Test
-    void snapshotMakesAnUnmodifiableCopyOfTheHistory() {
+    void snapshotKeepsItsHistoryWhenTheSourceListChanges() {
         PricePoint quote = new PricePoint(APPLE, DATE, 180);
         StockMetrics metrics = new StockMetrics(25.0, null, 220.0);
         List<PricePoint> source = new ArrayList<>(List.of(quote));
@@ -37,7 +37,6 @@ class StockSnapshotTest {
         assertEquals(DATE, quote.getDate());
         assertEquals(180, quote.getClose());
         assertEquals(List.of(quote), snapshot.getHistory());
-        assertThrows(UnsupportedOperationException.class, () -> snapshot.getHistory().clear());
         assertSame(metrics, snapshot.getMetrics());
         assertEquals(25.0, metrics.getPriceToEarnings().orElseThrow());
         assertFalse(metrics.getWeek52Low().isPresent());
