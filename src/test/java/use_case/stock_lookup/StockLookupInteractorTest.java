@@ -6,6 +6,8 @@ import entity.Security;
 import entity.StockMetrics;
 import entity.StockSnapshot;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -48,10 +50,11 @@ class StockLookupInteractorTest {
         assertEquals("BRK.B", presenter.successData.getTicker());
     }
 
-    @Test
-    void blankTickerReportsError() {
+    @ParameterizedTest
+    @ValueSource(strings = {"  ", ""})
+    void blankTickerReportsError(String ticker) {
         RecordingPresenter presenter = new RecordingPresenter();
-        new StockLookupInteractor(this::unexpectedLookup, presenter).execute(new StockLookupInputData("  "));
+        new StockLookupInteractor(this::unexpectedLookup, presenter).execute(new StockLookupInputData(ticker));
 
         assertEquals("Please enter a stock ticker.", presenter.errorMessage);
         assertNull(presenter.successData);
@@ -66,10 +69,11 @@ class StockLookupInteractorTest {
         assertNull(presenter.successData);
     }
 
-    @Test
-    void malformedTickerDoesNotCallGateway() {
+    @ParameterizedTest
+    @ValueSource(strings = {"AA PL", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"})
+    void malformedTickerDoesNotCallDataAccess(String ticker) {
         RecordingPresenter presenter = new RecordingPresenter();
-        new StockLookupInteractor(this::unexpectedLookup, presenter).execute(new StockLookupInputData("AA PL"));
+        new StockLookupInteractor(this::unexpectedLookup, presenter).execute(new StockLookupInputData(ticker));
 
         assertEquals("Enter a valid ticker, such as AAPL or BRK.B.", presenter.errorMessage);
         assertNull(presenter.successData);

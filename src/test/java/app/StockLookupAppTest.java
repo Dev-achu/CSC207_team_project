@@ -8,6 +8,7 @@ import entity.StockMetrics;
 import entity.StockSnapshot;
 import org.junit.jupiter.api.Test;
 import use_case.dashboard.DashboardStockDataAccessInterface;
+import use_case.stock_lookup.StockDataException;
 import use_case.stock_lookup.StockLookupDataAccessInterface;
 import view.StockLookupView;
 
@@ -27,11 +28,12 @@ import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StockLookupAppTest {
     @Test
-    void screenDisplaysLookupResultFromTheWiredUseCase() throws Exception {
+    void screenDisplaysLookupResultAndClearsItAfterFailedSearch() throws Exception {
         LocalDate date = LocalDate.of(2026, 1, 5);
         Security apple = new Security("AAPL", "Apple Inc.", AssetClass.STOCK);
         PricePoint quote = new PricePoint(apple, date, 190);
@@ -39,6 +41,9 @@ class StockLookupAppTest {
         AtomicReference<String> submittedTicker = new AtomicReference<>();
         StockLookupDataAccessInterface lookupData = ticker -> {
             submittedTicker.set(ticker);
+            if (ticker.equals("UNKNOWN")) {
+                throw new StockDataException("Ticker not found: UNKNOWN.");
+            }
             return new StockLookupDataAccessInterface.Result(snapshot, "");
         };
         DashboardStockDataAccessInterface dashboardData = new DashboardStockDataAccessInterface() {
@@ -71,11 +76,32 @@ class StockLookupAppTest {
 
         assertTrue(rendered.await(5, TimeUnit.SECONDS));
         assertEquals("AAPL", submittedTicker.get());
+        CountDownLatch failureRendered = new CountDownLatch(1);
         SwingUtilities.invokeAndWait(() -> {
             JLabel latest = find(view.get(), JLabel.class, label -> label.getText().startsWith("Latest close:"));
             JLabel metrics = find(view.get(), JLabel.class, label -> label.getText().startsWith("P/E:"));
             assertEquals("Latest close: 190.00 (2026-01-05)", latest.getText());
             assertTrue(metrics.getText().contains("52-week low: Unavailable"));
+
+            JButton search = find(view.get(), JButton.class, button -> button.getText().equals("Look up"));
+            search.addPropertyChangeListener("enabled", event -> {
+                if (Boolean.TRUE.equals(event.getNewValue())) {
+                    failureRendered.countDown();
+                }
+            });
+            find(view.get(), JTextField.class, field -> true).setText("unknown");
+            search.doClick();
+        });
+
+        assertTrue(failureRendered.await(5, TimeUnit.SECONDS));
+        assertEquals("UNKNOWN", submittedTicker.get());
+        SwingUtilities.invokeAndWait(() -> {
+            JLabel error = find(view.get(), JLabel.class, label -> label.getText().startsWith("Ticker not found:"));
+            assertEquals("Ticker not found: UNKNOWN.", error.getText());
+            assertFalse(find(view.get(), JButton.class, button -> button.getText().equals("Add to portfolio"))
+                    .isEnabled());
+            assertNull(findOrNull(view.get(), JLabel.class,
+                    label -> label.getText().startsWith("Latest close:")));
         });
     }
 
