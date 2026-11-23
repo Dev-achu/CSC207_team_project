@@ -10,7 +10,7 @@ A portfolio tracking app for beginner and intermediate retail investors who hold
 | Ryan | @ryanssaleh | UC2: Portfolio Dashboard | UC1 |
 | Diego | @diegoAisa10 | UC3: Stock Lookup & Evaluator | UC4 |
 | Achu | @dev-Achu | UC4: Performance vs. Benchmark & Inflation | UC3 |
-| Member E | @___ | UC5: Rebalancing Planner | UC2 |
+| Member E | @seanb12345 | UC5: Rebalancing Planner | UC2 |
 
 Every member leads exactly one use case.
 
@@ -39,7 +39,7 @@ The MVP is the minimal set below. Anything else is a stretch goal and is only st
 - **Error cases:** Portfolio has no history in the range, benchmark or CPI data unavailable, invalid date range.
 - **Note:** MVP uses simple total return. Time-weighted return and XIRR are stretch goals.
 
-### UC5: Rebalancing Planner (Lead: Member E)
+### UC5: Rebalancing Planner (Lead: Sean)
 - **User story:** As an investor, I want to set target ratios across asset classes and see exactly what to buy or sell to get back on target.
 - **Main flow:** Set targets (sum to 100%) → compute current weights and drift → if drift exceeds a threshold, output buy/sell amounts per asset class (and per holding if feasible) → display the plan.
 - **Error cases:** Targets do not sum to 100%, empty portfolio, negative targets, no rebalancing needed (report this clearly).
