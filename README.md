@@ -6,7 +6,7 @@ A portfolio tracking app for beginner and intermediate retail investors who hold
 
 | Member | GitHub | Lead use case | Supports |
 |--------|--------|---------------|----------|
-| Member A | @___ | UC1: Account & Session | UC2 |
+| Member A | @harounaiaydeh-dev| UC1: Account & Session | UC2 |
 | Ryan | @ryanssaleh | UC2: Portfolio Dashboard | UC1 |
 | Diego | @diegoAisa10 | UC3: Stock Lookup & Evaluator | UC4 |
 | Achu | @dev-Achu | UC4: Performance vs. Benchmark & Inflation | UC3 |
@@ -18,7 +18,7 @@ Every member leads exactly one use case.
 
 The MVP is the minimal set below. Anything else is a stretch goal and is only started once all five use cases work end to end.
 
-### UC1: Account & Session (Lead: Member A)
+### UC1: Account & Session (Lead: Haroun)
 - **User story:** As an investor, I want to sign up, log in, and log out so my portfolio is private and saved.
 - **Main flow:** Enter username and password → validate → create or load the user → show the dashboard. Logout clears the session.
 - **Error cases:** Username taken, empty or weak password, wrong credentials, user not found.
