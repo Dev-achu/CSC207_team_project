@@ -1,9 +1,18 @@
 package use_case.stock_lookup;
 
+import entity.AssetClass;
+import entity.PricePoint;
+import entity.Security;
+import entity.StockMetrics;
+import entity.StockSnapshot;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class StockLookupInteractorTest {
     private static class RecordingPresenter implements StockLookupOutputBoundary {
@@ -24,16 +33,17 @@ class StockLookupInteractorTest {
     @Test
     void lowercaseTickerIsNormalized() {
         RecordingPresenter presenter = new RecordingPresenter();
-        new StockLookupInteractor(presenter).execute(new StockLookupInputData(" aapl "));
+        new StockLookupInteractor(this::marketData, presenter).execute(new StockLookupInputData(" aapl "));
 
         assertEquals("AAPL", presenter.successData.getTicker());
+        assertEquals(180.5, presenter.successData.getQuote().getClose());
         assertNull(presenter.errorMessage);
     }
 
     @Test
     void tickerWithDotIsPreserved() {
         RecordingPresenter presenter = new RecordingPresenter();
-        new StockLookupInteractor(presenter).execute(new StockLookupInputData("brk.b"));
+        new StockLookupInteractor(this::marketData, presenter).execute(new StockLookupInputData("brk.b"));
 
         assertEquals("BRK.B", presenter.successData.getTicker());
     }
@@ -41,7 +51,7 @@ class StockLookupInteractorTest {
     @Test
     void blankTickerReportsError() {
         RecordingPresenter presenter = new RecordingPresenter();
-        new StockLookupInteractor(presenter).execute(new StockLookupInputData("  "));
+        new StockLookupInteractor(this::unexpectedLookup, presenter).execute(new StockLookupInputData("  "));
 
         assertEquals("Please enter a stock ticker.", presenter.errorMessage);
         assertNull(presenter.successData);
@@ -50,9 +60,51 @@ class StockLookupInteractorTest {
     @Test
     void missingInputReportsError() {
         RecordingPresenter presenter = new RecordingPresenter();
-        new StockLookupInteractor(presenter).execute(null);
+        new StockLookupInteractor(this::unexpectedLookup, presenter).execute(null);
 
         assertEquals("Please enter a stock ticker.", presenter.errorMessage);
         assertNull(presenter.successData);
+    }
+
+    @Test
+    void malformedTickerDoesNotCallGateway() {
+        RecordingPresenter presenter = new RecordingPresenter();
+        new StockLookupInteractor(this::unexpectedLookup, presenter).execute(new StockLookupInputData("AA PL"));
+
+        assertEquals("Enter a valid ticker, such as AAPL or BRK.B.", presenter.errorMessage);
+        assertNull(presenter.successData);
+    }
+
+    @Test
+    void dataAccessFailureIsPresented() {
+        RecordingPresenter presenter = new RecordingPresenter();
+        StockLookupDataAccessInterface dataAccess = ticker -> {
+            throw new StockDataException("Ticker not found: INVALID.");
+        };
+        new StockLookupInteractor(dataAccess, presenter).execute(new StockLookupInputData("invalid"));
+
+        assertEquals("Ticker not found: INVALID.", presenter.errorMessage);
+        assertNull(presenter.successData);
+    }
+
+    @Test
+    void cachedSnapshotIncludesNotice() {
+        RecordingPresenter presenter = new RecordingPresenter();
+        StockLookupDataAccessInterface dataAccess = ticker ->
+                new StockLookupDataAccessInterface.Result(marketData(ticker).getSnapshot(), "Provider unavailable.");
+        new StockLookupInteractor(dataAccess, presenter).execute(new StockLookupInputData("AAPL"));
+
+        assertEquals("Showing cached data. Provider unavailable.", presenter.successData.getDataNotice());
+    }
+
+    private StockLookupDataAccessInterface.Result marketData(String ticker) {
+        Security security = new Security(ticker, ticker, AssetClass.STOCK);
+        PricePoint quote = new PricePoint(security, LocalDate.of(2026, 1, 5), 180.5);
+        StockSnapshot snapshot = new StockSnapshot(quote, List.of(quote), new StockMetrics(null, null, null));
+        return new StockLookupDataAccessInterface.Result(snapshot, "");
+    }
+
+    private StockLookupDataAccessInterface.Result unexpectedLookup(String ticker) {
+        return fail("Input validation should stop the data access call.");
     }
 }

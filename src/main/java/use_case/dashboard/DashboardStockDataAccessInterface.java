@@ -5,7 +5,7 @@ import entity.Security;
 /**
  * The market data the Portfolio Dashboard use case needs: looking up a
  * ticker and getting its current price. Kept small on purpose (Interface
- * Segregation); the shared stock data gateway can implement this interface.
+ * Segregation); the shared stock data access class can implement this interface.
  */
 public interface DashboardStockDataAccessInterface {
 

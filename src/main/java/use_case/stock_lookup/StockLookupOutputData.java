@@ -1,14 +1,38 @@
 package use_case.stock_lookup;
 
-/** Initial UC3 result; stock details will be added in a later commit. */
-public class StockLookupOutputData {
-    private final String ticker;
+import entity.PricePoint;
+import entity.StockMetrics;
+import entity.StockSnapshot;
 
-    public StockLookupOutputData(String ticker) {
-        this.ticker = ticker;
+import java.util.List;
+
+/** The quote, history, fundamentals, and any data notice for a lookup. */
+public class StockLookupOutputData {
+    private final StockSnapshot snapshot;
+    private final String dataNotice;
+
+    public StockLookupOutputData(StockSnapshot snapshot, String dataNotice) {
+        this.snapshot = snapshot;
+        this.dataNotice = dataNotice;
     }
 
     public String getTicker() {
-        return ticker;
+        return getQuote().getSecurity().getTicker();
+    }
+
+    public PricePoint getQuote() {
+        return snapshot.getQuote();
+    }
+
+    public List<PricePoint> getHistory() {
+        return snapshot.getHistory();
+    }
+
+    public StockMetrics getMetrics() {
+        return snapshot.getMetrics();
+    }
+
+    public String getDataNotice() {
+        return dataNotice;
     }
 }
