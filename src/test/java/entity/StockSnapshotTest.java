@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/** Tests price validation and verifies that the snapshot keeps its own copy of the history. */
 class StockSnapshotTest {
     private static final Security APPLE = new Security("AAPL", "Apple Inc.", AssetClass.STOCK);
     private static final LocalDate DATE = LocalDate.of(2026, 1, 5);

@@ -97,6 +97,7 @@ public final class StockLookupView extends JPanel {
         return panel;
     }
 
+    /** Captures the entered ticker and starts the lookup in the background. */
     private void lookUp() {
         if (busy) {
             return;
@@ -105,6 +106,7 @@ public final class StockLookupView extends JPanel {
         runTask(() -> lookupController.execute(submittedTicker), lookupStatus, "Loading market data...");
     }
 
+    /** Displays the quote, metrics, chart, and warning from the lookup state. */
     private void showLookup(StockLookupState state) {
         currentResult = state;
         if (state.hasResult()) {
@@ -123,6 +125,7 @@ public final class StockLookupView extends JPanel {
         updateButtons();
     }
 
+    /** Displays the holdings and feedback published by the dashboard. */
     private void showPortfolio(DashboardState state) {
         if (!state.getError().isEmpty()) {
             portfolioStatus.setText(state.getError());
@@ -137,6 +140,7 @@ public final class StockLookupView extends JPanel {
         holdings.setCaretPosition(0);
     }
 
+    /** Opens the buy form and submits the resulting trade through the dashboard controller. */
     private void addToPortfolio() {
         StockLookupState selected = currentResult;
         JTextField quantityField = new JTextField("1");
@@ -173,6 +177,7 @@ public final class StockLookupView extends JPanel {
         form.add(field);
     }
 
+    /** Runs work off Swing's event thread and restores the controls afterward. */
     private void runTask(Runnable task, JLabel status, String loadingMessage) {
         busy = true;
         status.setText(loadingMessage);

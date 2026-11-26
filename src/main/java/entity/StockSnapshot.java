@@ -9,6 +9,7 @@ public final class StockSnapshot {
     private final List<PricePoint> history;
     private final StockMetrics metrics;
 
+    /** Groups one lookup's data and copies the history so it cannot be changed through the original list. */
     public StockSnapshot(PricePoint quote, List<PricePoint> history, StockMetrics metrics) {
         this.quote = Objects.requireNonNull(quote);
         this.history = List.copyOf(history);

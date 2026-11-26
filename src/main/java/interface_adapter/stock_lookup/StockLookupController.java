@@ -11,6 +11,7 @@ public final class StockLookupController {
         this.lookup = lookup;
     }
 
+    /** Wraps the entered ticker in the input object expected by the use case. */
     public void execute(String ticker) {
         lookup.execute(new StockLookupInputData(ticker));
     }

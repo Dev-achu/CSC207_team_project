@@ -11,6 +11,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/** Checks that the chart draws flat prices and clears when history is empty. */
 class StockPriceChartTest {
     @Test
     void chartPlotsAFlatSeriesAndClearsItWhenHistoryIsEmpty() throws Exception {

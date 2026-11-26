@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/** Verifies that the presenter produces display text and chart data from a lookup result. */
 class StockLookupPresenterTest {
     private final StockLookupViewModel viewModel = new StockLookupViewModel();
     private final StockLookupPresenter presenter = new StockLookupPresenter(viewModel);

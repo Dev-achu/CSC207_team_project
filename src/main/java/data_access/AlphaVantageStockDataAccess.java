@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/** Alpha Vantage market data shared by lookup and the portfolio dashboard. */
+/** Fetches and caches Alpha Vantage market data for stock lookup and the portfolio dashboard. */
 public final class AlphaVantageStockDataAccess
         implements StockLookupDataAccessInterface, DashboardStockDataAccessInterface {
     private static final Duration CACHE_DURATION = Duration.ofHours(1);
@@ -58,6 +58,7 @@ public final class AlphaVantageStockDataAccess
         this.source = source;
     }
 
+    /** Returns a quote and daily history even when the fundamentals request fails. */
     @Override
     public synchronized Result lookup(String ticker) throws StockDataException {
         Cached<Result> previous = lookups.get(ticker);
@@ -72,6 +73,7 @@ public final class AlphaVantageStockDataAccess
                 throw new StockDataException("Price history is unavailable for " + ticker + ".");
             }
 
+            // An empty overview lets the metric parser mark each missing value as unavailable.
             JsonObject overview = new JsonObject();
             String fundamentalsWarning = "";
             try {
@@ -125,6 +127,7 @@ public final class AlphaVantageStockDataAccess
         }
     }
 
+    /** Reuses a fresh quote or fetches the latest close and trading date. */
     private PricePoint fetchQuote(String ticker) throws StockDataException {
         Cached<PricePoint> previous = quotes.get(ticker);
         if (isFresh(previous)) {
@@ -148,6 +151,7 @@ public final class AlphaVantageStockDataAccess
         }
     }
 
+    /** Validates daily closes and sorts them oldest first for the chart. */
     private List<PricePoint> parseHistory(JsonObject daily, Security security) throws StockDataException {
         List<PricePoint> history = new ArrayList<>();
         try {
@@ -163,6 +167,7 @@ public final class AlphaVantageStockDataAccess
         return history;
     }
 
+    /** Sends a provider request and translates failures into user-facing messages. */
     private JsonObject request(String function, String ticker) throws StockDataException {
         if (apiKey.isBlank()) {
             throw new StockDataException("Set ALPHAVANTAGE_API_KEY to look up stocks.");
@@ -264,6 +269,7 @@ public final class AlphaVantageStockDataAccess
         }
     }
 
+    /** Lets tests supply API responses without a network call. */
     @FunctionalInterface
     interface ResponseSource {
         String fetch(URI uri) throws IOException, InterruptedException, StockDataException;

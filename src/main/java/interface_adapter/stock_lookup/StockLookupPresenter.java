@@ -18,6 +18,7 @@ public final class StockLookupPresenter implements StockLookupOutputBoundary {
         this.viewModel = viewModel;
     }
 
+    /** Formats the quote and metrics for display and prepares closing prices for the chart. */
     @Override
     public void prepareSuccessView(StockLookupOutputData output) {
         PricePoint quote = output.getQuote();
@@ -38,11 +39,13 @@ public final class StockLookupPresenter implements StockLookupOutputBoundary {
                 metricsText, closes, firstDate, lastDate, output.getDataNotice()));
     }
 
+    /** Clears the lookup display and shows the error. */
     @Override
     public void prepareFailView(String errorMessage) {
         update(StockLookupState.empty(errorMessage));
     }
 
+    /** Stores the new state and notifies the view. */
     private void update(StockLookupState state) {
         viewModel.setState(state);
         viewModel.firePropertyChanged();

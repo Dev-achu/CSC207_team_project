@@ -29,10 +29,12 @@ public final class StockLookupState {
         this.status = status;
     }
 
+    /** Creates an initial or failed lookup state with no quote or chart data. */
     static StockLookupState empty(String status) {
         return new StockLookupState("", "", "", "", 0, "", List.of(), "", "", status);
     }
 
+    /** Tells the view if there is a stock result to display. */
     public boolean hasResult() {
         return !ticker.isEmpty();
     }

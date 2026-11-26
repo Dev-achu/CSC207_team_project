@@ -22,6 +22,7 @@ final class StockPriceChart extends JPanel {
         getAccessibleContext().setAccessibleName("Daily closing price chart");
     }
 
+    /** Replaces the plotted data and requests a repaint. */
     void setHistory(List<Double> closes, String firstDate, String lastDate) {
         this.closes = closes;
         this.firstDate = firstDate;
@@ -29,6 +30,7 @@ final class StockPriceChart extends JPanel {
         repaint();
     }
 
+    /** Scales the chart to the price range and adds padding when the prices are flat. */
     @Override
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
@@ -58,6 +60,7 @@ final class StockPriceChart extends JPanel {
         }
     }
 
+    /** Draws the date labels and price gridlines. */
     private void drawAxes(Graphics2D chart, int left, int top, int right, int bottom, double low, double high) {
         chart.setColor(Color.DARK_GRAY);
         chart.drawString("Daily close", left, 18);
@@ -75,6 +78,7 @@ final class StockPriceChart extends JPanel {
         }
     }
 
+    /** Maps trading sessions and closing prices to points on the chart. */
     private void drawPrices(Graphics2D chart, int left, int top, int right, int bottom, double low, double high) {
         chart.setColor(new Color(16, 91, 153));
         int previousX = left;

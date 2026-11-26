@@ -28,6 +28,7 @@ public final class StockLookupApp {
     private StockLookupApp() {
     }
 
+    /** Loads the provider configuration and opens the demo on Swing's event thread. */
     public static void main(String[] args) throws IOException {
         AlphaVantageStockDataAccess dataAccess = new AlphaVantageStockDataAccess(readApiKey());
         SwingUtilities.invokeLater(() -> {
@@ -60,6 +61,7 @@ public final class StockLookupApp {
         return new StockLookupView(lookupController, lookupModel, transactionController, dashboardModel, username);
     }
 
+    /** Checks the environment first, then the local .env file. */
     private static String readApiKey() throws IOException {
         String environmentKey = System.getenv(API_KEY_NAME);
         if (environmentKey != null && !environmentKey.isBlank()) {

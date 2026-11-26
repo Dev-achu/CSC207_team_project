@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/** Checks that the assembled screen displays and clears results using stubbed market data. */
 class StockLookupAppTest {
     @Test
     void screenDisplaysLookupResultAndClearsItAfterFailedSearch() throws Exception {

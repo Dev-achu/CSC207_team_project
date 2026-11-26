@@ -11,6 +11,7 @@ public class StockLookupOutputData {
     private final StockSnapshot snapshot;
     private final String dataNotice;
 
+    /** Passes the snapshot and its display notice to the presenter. */
     public StockLookupOutputData(StockSnapshot snapshot, String dataNotice) {
         this.snapshot = snapshot;
         this.dataNotice = dataNotice;

@@ -9,6 +9,7 @@ public final class PricePoint {
     private final LocalDate date;
     private final double close;
 
+    /** Requires a positive, finite closing price for the trading date. */
     public PricePoint(Security security, LocalDate date, double close) {
         if (!Double.isFinite(close) || close <= 0) {
             throw new IllegalArgumentException("Closing price must be positive and finite.");

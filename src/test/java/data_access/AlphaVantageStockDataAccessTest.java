@@ -39,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/** Exercises market data lookups and dashboard integration with stubbed API responses. */
 class AlphaVantageStockDataAccessTest {
     private static final String QUOTE = "{\"Global Quote\":{\"05. price\":\"191.25\","
             + "\"07. latest trading day\":\"2026-01-06\"}}";
@@ -83,6 +84,7 @@ class AlphaVantageStockDataAccessTest {
         assertFalse(result.getSnapshot().getMetrics().getPriceToEarnings().isPresent());
     }
 
+    /** Checks that an overview outage leaves the price data visible and the warning survives a cache hit. */
     @Test
     void failedOverviewStillDisplaysQuoteHistoryAndWarning() {
         AlphaVantageStockDataAccess dataAccess = dataAccess(uri -> {
@@ -283,6 +285,7 @@ class AlphaVantageStockDataAccessTest {
         }
     }
 
+    /** Lets cache tests advance time without waiting. */
     private static class MutableClock extends Clock {
         private Instant now = Instant.EPOCH;
 

@@ -16,7 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/** Tests ticker validation and the success, failure, and cache messages sent to the presenter. */
 class StockLookupInteractorTest {
+    /** Captures lookup output so tests can inspect it without a Swing view. */
     private static class RecordingPresenter implements StockLookupOutputBoundary {
         StockLookupOutputData successData;
         String errorMessage;
