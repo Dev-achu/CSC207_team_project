@@ -40,12 +40,13 @@ public final class AlphaVantageStockDataAccess
     private static final String RATE_LIMIT = "Alpha Vantage's request limit was reached. Try again later.";
     private static final String INVALID_DATA = "Alpha Vantage returned an invalid response.";
     private static final String ACCESS_DENIED = "Alpha Vantage denied the request. Check your API key and plan.";
+    private static final String FUNDAMENTALS_UNAVAILABLE = "Fundamentals are unavailable.";
 
     private final String apiKey;
     private final Clock clock;
     private final ResponseSource source;
     private final Map<String, Cached<PricePoint>> quotes = new HashMap<>();
-    private final Map<String, Cached<StockSnapshot>> lookups = new HashMap<>();
+    private final Map<String, Cached<Result>> lookups = new HashMap<>();
 
     public AlphaVantageStockDataAccess(String apiKey) {
         this(apiKey, Clock.systemUTC(), new HttpResponseSource());
@@ -59,9 +60,9 @@ public final class AlphaVantageStockDataAccess
 
     @Override
     public synchronized Result lookup(String ticker) throws StockDataException {
-        Cached<StockSnapshot> previous = lookups.get(ticker);
+        Cached<Result> previous = lookups.get(ticker);
         if (isFresh(previous)) {
-            return new Result(previous.value, "");
+            return previous.value;
         }
 
         try {
@@ -71,7 +72,16 @@ public final class AlphaVantageStockDataAccess
                 throw new StockDataException("Price history is unavailable for " + ticker + ".");
             }
 
-            JsonObject overview = request("OVERVIEW", ticker);
+            JsonObject overview = new JsonObject();
+            String fundamentalsWarning = "";
+            try {
+                overview = request("OVERVIEW", ticker);
+                if (overview.isEmpty()) {
+                    fundamentalsWarning = FUNDAMENTALS_UNAVAILABLE;
+                }
+            } catch (StockDataException failure) {
+                fundamentalsWarning = FUNDAMENTALS_UNAVAILABLE + " " + failure.getMessage();
+            }
             String name = field(overview, "Name");
             Security security = new Security(ticker, name.isBlank() ? ticker : name, AssetClass.STOCK);
             List<PricePoint> history = parseHistory(daily, security);
@@ -79,21 +89,23 @@ public final class AlphaVantageStockDataAccess
                     number(overview, "52WeekLow"), number(overview, "52WeekHigh"));
             PricePoint quote = new PricePoint(security, latest.getDate(), latest.getClose());
             StockSnapshot snapshot = new StockSnapshot(quote, history, metrics);
-            lookups.put(ticker, new Cached<>(snapshot, clock.instant()));
-            return new Result(snapshot, "");
+            Result result = new Result(snapshot, "", fundamentalsWarning);
+            lookups.put(ticker, new Cached<>(result, clock.instant()));
+            return result;
         } catch (StockDataException failure) {
             if (previous == null) {
                 throw failure;
             }
-            return new Result(previous.value, failure.getMessage());
+            return new Result(previous.value.getSnapshot(), failure.getMessage(),
+                    previous.value.getFundamentalsWarning());
         }
     }
 
     @Override
     public synchronized Security findSecurity(String ticker) {
-        Cached<StockSnapshot> known = lookups.get(ticker);
+        Cached<Result> known = lookups.get(ticker);
         if (known != null) {
-            return known.value.getQuote().getSecurity();
+            return known.value.getSnapshot().getQuote().getSecurity();
         }
 
         try {

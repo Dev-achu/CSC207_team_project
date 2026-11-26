@@ -1,6 +1,7 @@
 package use_case.stock_lookup;
 
 import java.util.Locale;
+import java.util.StringJoiner;
 
 /** Validates the ticker and retrieves the information needed to evaluate it. */
 public class StockLookupInteractor implements StockLookupInputBoundary {
@@ -29,8 +30,14 @@ public class StockLookupInteractor implements StockLookupInputBoundary {
         try {
             StockLookupDataAccessInterface.Result result = stockData.lookup(normalizedTicker);
             String reason = result.getCacheReason();
-            String notice = reason.isEmpty() ? "" : "Showing cached data. " + reason;
-            presenter.prepareSuccessView(new StockLookupOutputData(result.getSnapshot(), notice));
+            StringJoiner notice = new StringJoiner(" ");
+            if (!reason.isEmpty()) {
+                notice.add("Showing cached data. " + reason);
+            }
+            if (!result.getFundamentalsWarning().isEmpty()) {
+                notice.add(result.getFundamentalsWarning());
+            }
+            presenter.prepareSuccessView(new StockLookupOutputData(result.getSnapshot(), notice.toString()));
         } catch (StockDataException failure) {
             presenter.prepareFailView(failure.getMessage());
         }

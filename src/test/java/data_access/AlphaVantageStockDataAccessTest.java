@@ -8,12 +8,17 @@ import entity.TransactionType;
 import interface_adapter.dashboard.AddTransactionController;
 import interface_adapter.dashboard.DashboardPresenter;
 import interface_adapter.dashboard.DashboardViewModel;
+import interface_adapter.stock_lookup.StockLookupPresenter;
+import interface_adapter.stock_lookup.StockLookupState;
+import interface_adapter.stock_lookup.StockLookupViewModel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import use_case.dashboard.AddTransactionInteractor;
 import use_case.stock_lookup.StockDataException;
 import use_case.stock_lookup.StockLookupDataAccessInterface;
+import use_case.stock_lookup.StockLookupInputData;
+import use_case.stock_lookup.StockLookupInteractor;
 
 import java.io.IOException;
 import java.net.URI;
@@ -76,6 +81,34 @@ class AlphaVantageStockDataAccessTest {
 
         assertEquals(2, result.getSnapshot().getHistory().size());
         assertFalse(result.getSnapshot().getMetrics().getPriceToEarnings().isPresent());
+    }
+
+    @Test
+    void failedOverviewStillDisplaysQuoteHistoryAndWarning() {
+        AlphaVantageStockDataAccess dataAccess = dataAccess(uri -> {
+            if (uri.getQuery().contains("function=OVERVIEW")) {
+                throw new IOException("offline");
+            }
+            return response(uri);
+        });
+        StockLookupViewModel viewModel = new StockLookupViewModel();
+        StockLookupInteractor interactor = new StockLookupInteractor(dataAccess, new StockLookupPresenter(viewModel));
+        StockLookupInputData input = new StockLookupInputData("AAPL");
+
+        interactor.execute(input);
+
+        StockLookupState state = viewModel.getState();
+        assertTrue(state.hasResult());
+        assertEquals(191.25, state.getPrice());
+        assertEquals(List.of(190.0, 191.25), state.getCloses());
+        assertEquals("P/E: Unavailable     52-week low: Unavailable     52-week high: Unavailable",
+                state.getMetrics());
+        assertEquals("Fundamentals are unavailable. Could not reach Alpha Vantage. "
+                + "Check your connection and try again.", state.getStatus());
+
+        interactor.execute(input);
+
+        assertEquals(state.getStatus(), viewModel.getState().getStatus());
     }
 
     @Test
