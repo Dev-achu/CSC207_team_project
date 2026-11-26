@@ -6,11 +6,11 @@ A portfolio tracking app for beginner and intermediate retail investors who hold
 
 | Member | GitHub | Lead use case | Supports |
 |--------|--------|---------------|----------|
-| Member A | @___ | UC1: Account & Session | UC2 |
+| Member A | @harounaiaydeh-dev| UC1: Account & Session | UC2 |
 | Ryan | @ryanssaleh | UC2: Portfolio Dashboard | UC1 |
 | Diego | @diegoAisa10 | UC3: Stock Lookup & Evaluator | UC4 |
 | Achu | @dev-Achu | UC4: Performance vs. Benchmark & Inflation | UC3 |
-| Member E | @___ | UC5: Rebalancing Planner | UC2 |
+| Member E | @seanb12345 | UC5: Rebalancing Planner | UC2 |
 
 Every member leads exactly one use case.
 
@@ -18,7 +18,7 @@ Every member leads exactly one use case.
 
 The MVP is the minimal set below. Anything else is a stretch goal and is only started once all five use cases work end to end.
 
-### UC1: Account & Session (Lead: Member A)
+### UC1: Account & Session (Lead: Haroun)
 - **User story:** As an investor, I want to sign up, log in, and log out so my portfolio is private and saved.
 - **Main flow:** Enter username and password → validate → create or load the user → show the dashboard. Logout clears the session.
 - **Error cases:** Username taken, empty or weak password, wrong credentials, user not found.
@@ -39,7 +39,7 @@ The MVP is the minimal set below. Anything else is a stretch goal and is only st
 - **Error cases:** Portfolio has no history in the range, benchmark or CPI data unavailable, invalid date range.
 - **Note:** MVP uses simple total return. Time-weighted return and XIRR are stretch goals.
 
-### UC5: Rebalancing Planner (Lead: Member E)
+### UC5: Rebalancing Planner (Lead: Sean)
 - **User story:** As an investor, I want to set target ratios across asset classes and see exactly what to buy or sell to get back on target.
 - **Main flow:** Set targets (sum to 100%) → compute current weights and drift → if drift exceeds a threshold, output buy/sell amounts per asset class (and per holding if feasible) → display the plan.
 - **Error cases:** Targets do not sum to 100%, empty portfolio, negative targets, no rebalancing needed (report this clearly).
@@ -98,7 +98,7 @@ src/
   interface_adapter/
     account/ dashboard/ stock_lookup/ performance/ rebalance/
   data_access/
-    StockDataGateway        (market API, with caching)
+    AlphaVantageStockDataAccess (market API, with caching)
     InflationDataGateway    (CPI source)
     UserRepository
     PortfolioRepository
@@ -109,7 +109,7 @@ tests/
 ```
 
 ### Shared DataAccess interfaces
-- `StockDataGateway`: quote, price history, key metrics. **Owner: Member C.**
+- `StockLookupDataAccessInterface`: quote, price history, key metrics. **Owner: Member C.**
 - `InflationDataGateway`: CPI series. **Owner: Member D.**
 - `PortfolioRepository`, `UserRepository`: persistence. **Owners: Members B and A.**
 
@@ -118,10 +118,10 @@ Interactors depend only on these interfaces so tests can use in-memory stubs.
 ## Tech & APIs
 
 - **Language / UI:** <fill in>
-- **Market data:** <Alpha Vantage / Finnhub / Twelve Data / yfinance>; verify free-tier limits before committing
+- **Market data (UC3):** [Alpha Vantage](https://www.alphavantage.co/documentation/) provides the latest end-of-day quote, up to 100 daily closes, and available fundamentals.
 - **Inflation data:** <FRED or Statistics Canada>
 - **Persistence:** <file/JSON, SQLite, or similar>
-- **Testing:** <JUnit / pytest>, with stubbed gateways
+- **Testing:** <JUnit / pytest>, with stubbed data access
 - **API keys:** stored in a local `.env` file, never committed. See Setup.
 
 ## Setup & Running
@@ -131,12 +131,21 @@ Interactors depend only on these interfaces so tests can use in-memory stubs.
 3. Build and run: `<commands>`
 4. Run tests: `<commands>`
 
+### Run the stock lookup demo
+
+1. Use Java 11 or newer and Maven. Copy `.env.example` to `.env` and set `ALPHAVANTAGE_API_KEY` to your Alpha Vantage key. You can also set the environment variable directly.
+2. Run `mvn compile exec:java "-Dexec.mainClass=app.StockLookupApp"`.
+3. Look up a stock such as `AAPL`. Select **Add to portfolio** to record a buy with your quantity, actual trade price, and date. The demo holds purchases in memory for the current session.
+4. Run `mvn test` to verify the use case and data access implementation with stubbed market responses.
+
+A new ticker can use three requests. The standard free key allows [25 requests per day](https://www.alphavantage.co/support/api-key/). Successful data is cached in memory for an hour, and the screen labels cached data when a refresh fails. Missing fundamentals appear as **Unavailable**.
+
 ## Milestones
 
 | Phase | Goal | Done when |
 |-------|------|-----------|
 | 1 | Repo, README, entities, package skeleton | Entities have unit tests; all leads have a branch |
-| 2 | Interactors and stub UIs per use case | Each interactor passes tests with stub gateways |
+| 2 | Interactors and stub UIs per use case | Each interactor passes tests with stub data access implementations |
 | 3 | Real data and persistence wired in | Log in → add holding → see value works end to end |
 | 4 | Remaining UCs integrated, polish | All five use cases demoable |
 | 5 | Stretch goals, bug fixes, final demo | Demo script rehearsed |
